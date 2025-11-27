@@ -1,0 +1,31 @@
+# docker-compose.yml
+#version: '3.8'
+
+services:
+  llm-server:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - llm-network
+    ports:
+      - "8000:8000"
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - TRANSFORMERS_CACHE=/app/models
+      - HF_HOME=/app/models
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    volumes:
+      - ./models:/app/models
+      - ./cache:/app/.cache
+    restart: unless-stopped
+
+networks:
+    llm-network:
+        driver: bridge
